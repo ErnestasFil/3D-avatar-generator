@@ -16,9 +16,10 @@ class Exception(APIException):
 
 
 class Validation:
-    def __init__(self, field_name, value):
+    def __init__(self, field_name, value, extra_name=""):
         self.field_name = field_name
         self.value = value
+        self.extra_name = extra_name if extra_name else field_name
         self.errors = {}
 
     def add_error(self, message):
@@ -28,7 +29,7 @@ class Validation:
 
     def validate_required(self):
         if not self.value:
-            self.add_error(f"Field {self.field_name} may not be blank.")
+            self.add_error(f"Field {self.extra_name} may not be blank.")
 
     def validate_alpha(self):
         if self.value is not None and not self.value.isalpha():

@@ -17,7 +17,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password_confirmation = serializers.CharField(
-        style={"input_type": "password"}, write_only=True, required=False
+        style={"input_type": "password"},
+        write_only=True,
+        required=False,
+        validators=[],
     )
 
     class Meta:
@@ -52,11 +55,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password_validator.validate_required()
         password_validator.validate_password_strength()
         password_validator.validate_value_equal(
-            password_confirmation, "password_confirmation"
+            password_confirmation, "password confirmation"
         )
         errors.update(password_validator.get_errors())
 
-        password_validator_confirm = Validation("password_confirmation", password)
+        password_validator_confirm = Validation(
+            "password_confirmation", password_confirmation, "password confirmation"
+        )
         password_validator_confirm.validate_required()
         errors.update(password_validator_confirm.get_errors())
 
