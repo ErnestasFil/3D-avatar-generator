@@ -54,7 +54,7 @@ class ImagePostSerializer(serializers.ModelSerializer):
         image_validator = Validation("image", image)
         image_validator.validate_required()
         image_validator.validate_image_format(image.name if image else "")
-        image_validator.validate_image_size(image, 500, 500, 3000, 3000)
+        image_validator.validate_image_size(image, 500, 500, 5000, 5000)
 
         errors.update(image_validator.get_errors())
 
@@ -73,8 +73,6 @@ class ImagePostSerializer(serializers.ModelSerializer):
         with open(image_path, "wb") as image_file:
             image_data.seek(0)
             image_file.write(image_data.read())
-        image = Photo(
-            name=name, path=settings.MEDIA_ROOT + "/" + filename, fk_userid_id=user_id
-        )
+        image = Photo(name=name, path="photos/" + filename, fk_userid_id=user_id)
         image.save()
         return image

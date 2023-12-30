@@ -31,7 +31,7 @@ SECRET_KEY = "django-insecure-8*8qxx)rt742(x#_#(+c35vadvo0v%)&3nrmc%g@_z17$hif%b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", "78.62.39.220", "192.168.1.182"]
 
 
 # Application definition
@@ -63,6 +63,8 @@ MIDDLEWARE = [
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://192.168.1.182",
+    "http://78.62.39.220",
 ]
 
 ROOT_URLCONF = "Backend.urls"
@@ -137,7 +139,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "Frontend/build/static")]
-MEDIA_ROOT = "photos"
+MEDIA_ROOT = os.path.join(BASE_DIR, "photos")
+MEDIA_URL = "/photos/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -159,8 +162,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20000),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(hours=24),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "ALGORITHM": "HS512",

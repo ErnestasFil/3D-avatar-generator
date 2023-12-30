@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Drawer,
     List,
@@ -8,13 +8,26 @@ import {
     ListItemText,
     Toolbar
 } from '@mui/material';
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import { grey } from '@mui/material/colors';
-
+import AuthProvider from '../context/AuthProvider';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+    Login as LoginIcon,
+    AppRegistration as AppRegistrationIcon,
+    Collections,
+    ThreeDRotation
+} from '@mui/icons-material';
 const drawerWidth = 240;
 
 export default function DrawerMenu({ open }) {
+    const [userId, setUserid] = useState(null);
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const result = await AuthProvider.getCurrentUser();
+            setUserid(result);
+        };
+        fetchUserId();
+    });
     return (
         <Drawer
             sx={{
@@ -31,16 +44,45 @@ export default function DrawerMenu({ open }) {
             open={open}>
             <Toolbar />
             <List>
-                {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index % 2 === 0 ? <MoveToInboxIcon /> : <MailIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
+                {userId ? (
+                    <>
+                        <ListItem key="image_list" disablePadding>
+                            <ListItemButton component={RouterLink} to="/image_list">
+                                <ListItemIcon>
+                                    <Collections />
+                                </ListItemIcon>
+                                <ListItemText primary="Image list" />
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem key="project_list" disablePadding>
+                            <ListItemButton component={RouterLink} to="/project_list">
+                                <ListItemIcon>
+                                    <ThreeDRotation />
+                                </ListItemIcon>
+                                <ListItemText primary="Project list" />
+                            </ListItemButton>
+                        </ListItem>
+                    </>
+                ) : (
+                    <>
+                        <ListItem key="login" disablePadding>
+                            <ListItemButton component={RouterLink} to="/login">
+                                <ListItemIcon>
+                                    <LoginIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Login" />
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem key="register" disablePadding>
+                            <ListItemButton component={RouterLink} to="/register">
+                                <ListItemIcon>
+                                    <AppRegistrationIcon />
+                                </ListItemIcon>
+                                <ListItemText primary="Register" />
+                            </ListItemButton>
+                        </ListItem>
+                    </>
+                )}
             </List>
         </Drawer>
     );

@@ -156,3 +156,4 @@ cython_debug/
 /.venv
 /Frontend/node_modules
 /Frontend/package-lock.json
+/photos

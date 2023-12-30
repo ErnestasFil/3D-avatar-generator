@@ -4,6 +4,7 @@ import { CssBaseline, Box, Container, Paper } from '@mui/material';
 import NavBar from '../components/NavBar';
 import DrawerMenu from '../components/Drawer';
 import AppRouter from '../router';
+
 const darkTheme = createTheme({
     palette: {
         mode: 'dark'

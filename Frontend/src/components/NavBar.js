@@ -2,9 +2,10 @@ import * as React from 'react';
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem } from '@mui/material';
 import * as Icon from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
-
+import AuthProvider from '../context/AuthProvider';
 export default function NavBar({ handleDrawer }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [userId, setUserid] = React.useState(null);
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -12,6 +13,19 @@ export default function NavBar({ handleDrawer }) {
 
     const handleClose = () => {
         setAnchorEl(null);
+    };
+    React.useEffect(() => {
+        const fetchUserId = async () => {
+            const result = await AuthProvider.getCurrentUser();
+            setUserid(result);
+            console.log(result);
+        };
+        fetchUserId();
+    });
+    const handleLogout = () => {
+        AuthProvider.logout();
+        setUserid(null);
+        handleClose();
     };
 
     return (
@@ -53,12 +67,35 @@ export default function NavBar({ handleDrawer }) {
                         keepMounted
                         open={Boolean(anchorEl)}
                         onClose={handleClose}>
-                        <MenuItem onClick={handleClose} component={RouterLink} to="/login">
-                            Login
-                        </MenuItem>
-                        <MenuItem onClick={handleClose} component={RouterLink} to="/register">
-                            Register
-                        </MenuItem>
+                        {userId
+                            ? [
+                                  <MenuItem
+                                      key="profile"
+                                      onClick={handleClose}
+                                      component={RouterLink}
+                                      to="/profile">
+                                      Profile
+                                  </MenuItem>,
+                                  <MenuItem key="logout" onClick={handleLogout}>
+                                      Logout
+                                  </MenuItem>
+                              ]
+                            : [
+                                  <MenuItem
+                                      key="login"
+                                      onClick={handleClose}
+                                      component={RouterLink}
+                                      to="/login">
+                                      Login
+                                  </MenuItem>,
+                                  <MenuItem
+                                      key="register"
+                                      onClick={handleClose}
+                                      component={RouterLink}
+                                      to="/register">
+                                      Register
+                                  </MenuItem>
+                              ]}
                     </Menu>
                 </div>
             </Toolbar>

@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardActions, CardContent, Typography, Container, TextField } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
-import { enqueueSnackbar } from 'notistack';
-
+import Notification from '../components/Notification';
 const Register = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -44,22 +43,11 @@ const Register = () => {
             .post('http://127.0.0.1:8000/api/register', cleanedFormData)
             .then((response) => {
                 const message = response.data.message;
-                enqueueSnackbar(
-                    <div>
-                        <b>Success</b>
-                        <br />
-                        {message}
-                    </div>,
-                    {
-                        autoHideDuration: 3000,
-                        variant: 'success',
-                        anchorOrigin: { horizontal: 'center', vertical: 'bottom' }
-                    }
-                );
+                Notification(message, 'Success', 'success', 3000);
                 navigate('/login');
             })
             .catch((error) => {
-                if (error.response && error.response.status === 422) {
+                if (error.response?.status === 422 || error.response?.status === 400) {
                     setTimeout(() => {
                         setErrors(error.response.data);
                     }, 500);
@@ -67,18 +55,7 @@ const Register = () => {
                     const message = error.response
                         ? error.response.data.message
                         : 'Unexpected error';
-                    enqueueSnackbar(
-                        <div>
-                            <b>Error</b>
-                            <br />
-                            {message}
-                        </div>,
-                        {
-                            autoHideDuration: 3000,
-                            variant: 'error',
-                            anchorOrigin: { horizontal: 'center', vertical: 'bottom' }
-                        }
-                    );
+                    Notification(message, 'Error', 'error', 3000);
                 }
             });
         setTimeout(() => {
@@ -94,6 +71,7 @@ const Register = () => {
                         Registration
                     </Typography>
                 </CardContent>
+                <hr />
                 <CardContent onChange={handleChange}>
                     <TextField
                         id="name"
