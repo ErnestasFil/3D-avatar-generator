@@ -62,6 +62,14 @@ export default function DrawerMenu({ open }) {
                                 <ListItemText primary="Project list" />
                             </ListItemButton>
                         </ListItem>
+                        <ListItem key="scene" disablePadding>
+                            <ListItemButton component={RouterLink} to="/scene">
+                                <ListItemIcon>
+                                    <ThreeDRotation />
+                                </ListItemIcon>
+                                <ListItemText primary="Scene" />
+                            </ListItemButton>
+                        </ListItem>
                     </>
                 ) : (
                     <>

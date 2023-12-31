@@ -36,7 +36,7 @@ class Validation:
             self.add_error("This field can only contain letters.")
 
     def validate_alphanumeric_spaces(self):
-        if self.value is not None and not re.match("^[a-zA-Z0-9\s]*$", self.value):
+        if self.value is not None and not re.match("^[\w\s]*$", self.value):
             self.add_error("This field can only contain letters, numbers, and spaces.")
 
     def validate_unique_field(self, model, field):
