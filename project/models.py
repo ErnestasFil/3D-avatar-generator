@@ -19,6 +19,11 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=255, blank=True)
     edit_time = models.DateTimeField(auto_now_add=True)
+    offsetX = models.FloatField(blank=True)
+    offsetY = models.FloatField(blank=True)
+    scaleX = models.FloatField(blank=True)
+    scaleY = models.FloatField(blank=True)
+    screenPath = models.CharField(max_length=255, blank=True)
 
     class Meta:
         managed = True

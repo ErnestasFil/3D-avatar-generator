@@ -7,7 +7,7 @@ import ImageListView from './views/ImageListView';
 import ProjectListView from './views/ProjectListView';
 import SceneView from './views/SceneView';
 
-const AppRouter = ({ drawerOpen }) => {
+const AppRouter = ({ drawerOpen, open }) => {
     const navigate = useNavigate();
 
     return (
@@ -17,7 +17,11 @@ const AppRouter = ({ drawerOpen }) => {
             <Route exact path="/register" element={<Register />} />
             <Route exact path="/image_list" element={<ImageListView />} />
             <Route exact path="/project_list" element={<ProjectListView />} />
-            <Route exact path="/scene" element={<SceneView drawerOpen={() => drawerOpen()} />} />
+            <Route
+                exact
+                path="/scene"
+                element={<SceneView drawerOpen={() => drawerOpen()} open={open} />}
+            />
         </Routes>
     );
 };

@@ -52,7 +52,7 @@ function App() {
                 <DrawerMenu open={open} />
                 <Main open={open}>
                     <DrawerHeader />
-                    <AppRouter drawerOpen={handleDrawer} />
+                    <AppRouter drawerOpen={handleDrawer} open={open} />
                 </Main>
             </ThemeProvider>
         </Box>

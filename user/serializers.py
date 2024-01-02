@@ -1,5 +1,6 @@
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User as auth
 from rest_framework import serializers, status
 
 from Backend.validation import Exception, Validation
@@ -82,6 +83,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.get("password")
         hashed_password = make_password(password)
         user = User(email=email, name=name, surname=surname, password=hashed_password)
+        auth.objects.create_user(
+            username=email, email=email, password=hashed_password
+        ).save()
         user.save()
         return user
 
@@ -113,6 +117,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
 class EmailAuthBackend(ModelBackend):
     def authenticate(self, request, email=None, password=None):
         try:
+            print("eikit nx kurva")
             user = User.objects.get(email=email)
             if user.check_password(password):
                 return user
