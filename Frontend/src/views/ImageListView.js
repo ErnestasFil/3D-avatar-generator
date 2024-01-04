@@ -33,7 +33,7 @@ const ImageListView = () => {
             verifyToken().then((token) => {
                 setLoading(true);
                 axios
-                    .get(`http://127.0.0.1:8000/api/user/${user}/image`, {
+                    .get(`${apiUrl}/api/user/${user}/image`, {
                         headers: {
                             'Content-Type': 'application/json',
                             Accept: '*/*',

@@ -97,7 +97,7 @@ export default function ProjectDeleteModal({ open, data, onClose, deleteProjectL
                     <hr />
                     <ImageListItem key={data.id}>
                         <img
-                            src={`http://127.0.0.1:8000/${data.screenPath}`}
+                            src={`${apiUrl}/${data.screenPath}`}
                             alt={data.name}
                             style={{ maxHeight: '70vh' }}
                             loading="lazy"
