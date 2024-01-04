@@ -12,7 +12,7 @@ class Project(models.Model):
     )
     fk_photoid = models.ForeignKey(
         Photo,
-        models.DO_NOTHING,
+        models.CASCADE,
         db_column="fk_Photoid",
         blank=True,
         null=True,

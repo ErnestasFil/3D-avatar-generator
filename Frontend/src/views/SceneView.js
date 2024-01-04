@@ -19,15 +19,20 @@ import {
 } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { GUI } from 'dat.gui';
-import AuthProvider from '../context/AuthProvider';
 import axios from 'axios';
 import { SaveAlt } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import '../css/Scene.css';
+import { useAuth } from '../context/AuthContext';
+import { AuthVerifyRefresh } from '../context/AuthVerifyRefresh';
+const apiUrl = process.env.REACT_APP_API_URL;
 const SceneView = ({ drawerOpen, open }) => {
     let gui;
+    const navigate = useNavigate();
+    const { user, isLoggedIn } = useAuth();
+    const verifyToken = AuthVerifyRefresh();
     const [sceneInit, setSceneInit] = useState(new SceneInit('myThreeJsCanvas'));
     const [imageData, setImageData] = useState([]);
-    const [userId, setUserid] = useState(null);
     const [humanHead, setHumanHead] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [formData, setFormData] = useState({
@@ -51,7 +56,7 @@ const SceneView = ({ drawerOpen, open }) => {
         const loadHumanHead = () => {
             const loader = new GLTFLoader();
 
-            loader.load('/LeePerrySmith.glb', (gltf) => {
+            loader.load('static/LeePerrySmith.glb', (gltf) => {
                 const humanHead = gltf.scene;
                 humanHead.scale.set(1, 1, 1);
                 humanHead.rotation.set(0, 0, 0);
@@ -59,10 +64,12 @@ const SceneView = ({ drawerOpen, open }) => {
                 setHumanHead(humanHead);
             });
         };
-
         sceneInit.initialize(canvasRef);
         sceneInit.animate();
 
+        if (open) {
+            drawerOpen();
+        }
         loadHumanHead();
 
         return () => {
@@ -76,38 +83,35 @@ const SceneView = ({ drawerOpen, open }) => {
         sceneInit.onWindowResize(canvasRef, open);
     }, [drawerOpen]);
     useEffect(() => {
-        const fetchData = async () => {
-            const result = await AuthProvider.getCurrentUser();
-            if (result) {
-                setUserid(result);
-                await axios
-                    .get(`http://127.0.0.1:8000/api/user/${result}/image`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Accept: '*/*',
-                            Authorization: `Bearer ${AuthProvider.getAccessToken()}`
-                        }
-                    })
-                    .then((response) => {
-                        setImageData(response.data);
-
-                        console.log(response.data);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        if (error.response?.status === 403) {
-                            const message = error.response
-                                ? error.response.data.detail
-                                : 'Unexpected error';
-                            Notification(message, 'Error', 'error', 3000);
-                        } else {
-                            const message = error.response
-                                ? error.response.data.message
-                                : 'Unexpected error';
-                            Notification(message, 'Error', 'error', 3000);
-                        }
-                    });
-            }
+        const fetchData = () => {
+            verifyToken().then((token) => {
+                if (isLoggedIn) {
+                    axios
+                        .get(`${apiUrl}/api/user/${user}/image`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Accept: '*/*',
+                                Authorization: `Bearer ${token}`
+                            }
+                        })
+                        .then((response) => {
+                            setImageData(response.data);
+                        })
+                        .catch((error) => {
+                            if (error.response?.status === 403) {
+                                const message = error.response
+                                    ? error.response.data.detail
+                                    : 'Unexpected error';
+                                Notification(message, 'Error', 'error', 3000);
+                            } else {
+                                const message = error.response
+                                    ? error.response.data.message
+                                    : 'Unexpected error';
+                                Notification(message, 'Error', 'error', 3000);
+                            }
+                        });
+                }
+            });
         };
 
         fetchData();
@@ -121,7 +125,7 @@ const SceneView = ({ drawerOpen, open }) => {
             setSelectedImage(selecImage);
             if (selecImage) {
                 const textureLoader = new THREE.TextureLoader();
-                textureLoader.load(`http://127.0.0.1:8000/${selecImage.path}`, (texture) => {
+                textureLoader.load(`${apiUrl}/${selecImage.path}`, (texture) => {
                     const material = new THREE.MeshBasicMaterial({ map: texture });
                     gui = addTextureControls(material);
                     humanHead.traverse((node) => {
@@ -212,40 +216,35 @@ const SceneView = ({ drawerOpen, open }) => {
     const handleSubmit = async () => {
         setErrors({});
         setLoading(true);
-        console.log(formData);
         const cleanedFormData = removeEmptyValues(formData);
-        const result = await AuthProvider.getCurrentUser();
         const canvas = sceneInit.getScreenshot();
         cleanedFormData.screenPath = canvas;
-        if (result) {
-            await axios
-                .post(`http://127.0.0.1:8000/api/user/${result}/project`, cleanedFormData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: '*/*',
-                        Authorization: `Bearer ${AuthProvider.getAccessToken()}`
-                    }
-                })
-                .then((response) => {
-                    console.log(response);
-                    const message = response.data.message;
-                    Notification(message, 'Success', 'success', 3000);
-                    //navigate('/login');
-                })
-                .catch((error) => {
-                    console.log(error);
-                    if (error.response?.status === 422 || error.response?.status === 400) {
-                        setTimeout(() => {
-                            setErrors(error.response.data);
-                        }, 500);
-                    } else {
-                        const message = error.response
-                            ? error.response.data.message
-                            : 'Unexpected error';
-                        Notification(message, 'Error', 'error', 3000);
-                    }
-                });
-        }
+        verifyToken().then((token) => {
+            if (isLoggedIn) {
+                axios
+                    .post(`${apiUrl}/api/user/${user}/project`, cleanedFormData, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: '*/*',
+                            Authorization: `Bearer ${token}`
+                        }
+                    })
+                    .then((response) => {
+                        const message = response.data.message;
+                        Notification(message, 'Success', 'success', 3000);
+                        navigate('/project_list');
+                    })
+                    .catch((error) => {
+                        if (error.response?.status === 422 || error.response?.status === 400) {
+                            setTimeout(() => {
+                                setErrors(error.response.data);
+                            }, 500);
+                        } else {
+                            Notification('Error creating project.', 'Error', 'error', 3000);
+                        }
+                    });
+            }
+        });
         setTimeout(() => {
             setLoading(false);
         }, 500);
@@ -269,12 +268,10 @@ const SceneView = ({ drawerOpen, open }) => {
                             </Grid>
                             <Grid item xs={12} sx={{ display: { md: 'none', xd: 'block' } }}>
                                 <Card>
-                                    <CardContent>
-                                        <Alert severity="error" fullwidth="true">
-                                            <AlertTitle>Error</AlertTitle>
-                                            Screen is too small to use 3D scene.
-                                        </Alert>
-                                    </CardContent>
+                                    <Alert severity="error" fullwidth="true">
+                                        <AlertTitle>Error</AlertTitle>
+                                        Screen is too small to use 3D scene.
+                                    </Alert>
                                 </Card>
                             </Grid>
                             <Grid item md={3}>
@@ -299,7 +296,7 @@ const SceneView = ({ drawerOpen, open }) => {
                                                         {imageData.map((item) => (
                                                             <ImageListItem key={item.id}>
                                                                 <img
-                                                                    src={`http://127.0.0.1:8000/${item.path}`}
+                                                                    src={`${apiUrl}/${item.path}`}
                                                                     alt={item.name}
                                                                     loading="lazy"
                                                                 />
@@ -316,8 +313,7 @@ const SceneView = ({ drawerOpen, open }) => {
                                                                     onClick={() =>
                                                                         selectImage(item.id)
                                                                     }>
-                                                                    Select image &nbsp;
-                                                                    <i>{item.name}</i>
+                                                                    Select image "{item.name}"
                                                                 </Button>
                                                             </ImageListItem>
                                                         ))}

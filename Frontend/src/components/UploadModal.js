@@ -4,11 +4,15 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import { MuiFileInput } from 'mui-file-input';
 import { UploadFile, Close } from '@mui/icons-material';
 import axios from 'axios';
-import AuthProvider from '../context/AuthProvider';
 import Notification from '../components/Notification';
+import { useAuth } from '../context/AuthContext';
+import { AuthVerifyRefresh } from '../context/AuthVerifyRefresh';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 export default function UploadModal({ open, onClose, updateImageList }) {
     const [localOpen, setLocalOpen] = useState(false);
+    const { user, isLoggedIn } = useAuth();
+    const verifyToken = AuthVerifyRefresh();
     const [formData, setFormData] = useState({
         name: '',
         image: null
@@ -49,54 +53,54 @@ export default function UploadModal({ open, onClose, updateImageList }) {
         });
     };
     const handleSubmit = async () => {
-        const result = await AuthProvider.getCurrentUser();
-        if (result) {
-            setErrors({});
-            setLoading(true);
-            const cleanedFormData = removeEmptyValues(formData);
-            if (cleanedFormData['image']) {
-                const img = await convertImageToBase64(cleanedFormData['image']);
-                cleanedFormData['image'] = img;
-            }
+        verifyToken().then(async (token) => {
+            if (isLoggedIn) {
+                setErrors({});
+                setLoading(true);
+                const cleanedFormData = removeEmptyValues(formData);
+                if (cleanedFormData['image']) {
+                    const img = await convertImageToBase64(cleanedFormData['image']);
+                    cleanedFormData['image'] = img;
+                }
 
-            await axios
-                .post(`http://127.0.0.1:8000/api/user/${result}/image`, cleanedFormData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: '*/*',
-                        Authorization: `Bearer ${AuthProvider.getAccessToken()}`
-                    }
-                })
-                .then((response) => {
-                    console.log(response);
-                    updateImageList(response.data);
-                    const message = response.data.message;
-                    Notification(message, 'Success', 'success', 3000);
-                    handleClose();
-                })
-                .catch((error) => {
-                    if (error.response?.status === 422 || error.response?.status === 400) {
-                        setTimeout(() => {
-                            setErrors(error.response.data);
-                        }, 500);
-                    } else if (error.response?.status === 401) {
-                        const message = error.response
-                            ? error.response.data.errors
-                            : 'Unexpected error';
-                        Notification(message, 'Error', 'error', 3000);
+                axios
+                    .post(`${apiUrl}/api/user/${user}/image`, cleanedFormData, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: '*/*',
+                            Authorization: `Bearer ${token}`
+                        }
+                    })
+                    .then((response) => {
+                        updateImageList(response.data);
+                        const message = response.data.message;
+                        Notification(message, 'Success', 'success', 3000);
                         handleClose();
-                    } else {
-                        const message = error.response
-                            ? error.response.data.message
-                            : 'Unexpected error';
-                        Notification(message, 'Error', 'error', 3000);
-                        handleClose();
-                    }
-                });
-            setTimeout(() => {
-                setLoading(false);
-            }, 500);
-        }
+                    })
+                    .catch((error) => {
+                        if (error.response?.status === 422 || error.response?.status === 400) {
+                            setTimeout(() => {
+                                setErrors(error.response.data);
+                            }, 500);
+                        } else if (error.response?.status === 401) {
+                            const message = error.response
+                                ? error.response.data.errors
+                                : 'Unexpected error';
+                            Notification(message, 'Error', 'error', 3000);
+                            handleClose();
+                        } else {
+                            const message = error.response
+                                ? error.response.data.message
+                                : 'Unexpected error';
+                            Notification(message, 'Error', 'error', 3000);
+                            handleClose();
+                        }
+                    });
+                setTimeout(() => {
+                    setLoading(false);
+                }, 500);
+            }
+        });
     };
     const handleClose = () => {
         setFormData({ name: '', image: null });

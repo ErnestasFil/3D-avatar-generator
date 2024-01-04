@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardActions, CardContent, Typography, Container, TextField } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
 import Notification from '../components/Notification';
+const apiUrl = process.env.REACT_APP_API_URL;
 const Register = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -40,7 +41,7 @@ const Register = () => {
         setLoading(true);
         const cleanedFormData = removeEmptyValues(formData);
         await axios
-            .post('http://127.0.0.1:8000/api/register', cleanedFormData)
+            .post(`${apiUrl}/api/register`, cleanedFormData)
             .then((response) => {
                 const message = response.data.message;
                 Notification(message, 'Success', 'success', 3000);

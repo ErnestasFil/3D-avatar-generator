@@ -25,10 +25,27 @@ class Base64ImageField(serializers.ImageField):
 
 class ProjectSerializer(serializers.ModelSerializer):
     edit_time = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    image_path = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ("id", "name", "edit_time", "fk_photoid")
+        fields = (
+            "id",
+            "name",
+            "edit_time",
+            "fk_photoid",
+            "offsetX",
+            "offsetY",
+            "scaleX",
+            "scaleY",
+            "screenPath",
+            "image_path",
+        )
+
+    def get_image_path(self, obj):
+        if obj.fk_photoid:
+            return obj.fk_photoid.path
+        return None
 
 
 class ProjectPostSerializer(serializers.ModelSerializer):

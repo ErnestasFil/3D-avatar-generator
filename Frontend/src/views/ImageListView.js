@@ -12,37 +12,38 @@ import {
     AlertTitle
 } from '@mui/material';
 import axios from 'axios';
-import AuthProvider from '../context/AuthProvider';
 import { FileUpload } from '@mui/icons-material';
 import UploadModal from '../components/UploadModal';
 import Notification from '../components/Notification';
 import ImageDeleteModal from '../components/ImageDeleteModal';
+import { useAuth } from '../context/AuthContext';
+import { AuthVerifyRefresh } from '../context/AuthVerifyRefresh';
+const apiUrl = process.env.REACT_APP_API_URL;
 const ImageListView = () => {
-    const [userId, setUserid] = useState(null);
     const [loading, setLoading] = useState(false);
     const [imageData, setImageData] = useState([]);
     const [open, setOpen] = useState(null);
     const [openDelete, setOpenDelete] = useState(null);
     const [deleteData, setDeleteData] = useState([]);
+    const { user, loadingState } = useAuth();
+    const verifyToken = AuthVerifyRefresh();
     useEffect(() => {
-        const fetchData = async () => {
-            const result = await AuthProvider.getCurrentUser();
-            if (result) {
-                setUserid(result);
+        if (loadingState) return;
+        const fetchData = () => {
+            verifyToken().then((token) => {
                 setLoading(true);
-                await axios
-                    .get(`http://127.0.0.1:8000/api/user/${result}/image`, {
+                axios
+                    .get(`http://127.0.0.1:8000/api/user/${user}/image`, {
                         headers: {
                             'Content-Type': 'application/json',
                             Accept: '*/*',
-                            Authorization: `Bearer ${AuthProvider.getAccessToken()}`
+                            Authorization: `Bearer ${token}`
                         }
                     })
                     .then((response) => {
                         setImageData(response.data);
                     })
                     .catch((error) => {
-                        console.log(error);
                         if (error.response?.status === 403) {
                             const message = error.response
                                 ? error.response.data.detail
@@ -56,11 +57,10 @@ const ImageListView = () => {
                         }
                     });
                 setLoading(false);
-            }
+            });
         };
-
         fetchData();
-    }, []);
+    }, [loadingState]);
     const openModal = () => {
         setOpen(true);
     };
@@ -119,7 +119,7 @@ const ImageListView = () => {
                                     key={item.id}
                                     onClick={() => openDeleteModal(item.id)}>
                                     <img
-                                        src={`http://127.0.0.1:8000/${item.path}`}
+                                        src={`${apiUrl}/${item.path}`}
                                         alt={item.name}
                                         loading="lazy"
                                     />

@@ -37,18 +37,34 @@ class ProjectListCreateView(APIView):
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-class ProjectDeleteView(APIView):
+class ProjectSelectDeleteView(APIView):
     permission_classes = [IsAuthenticated, IsOwner, IsProjectOwner]
 
     def check_object_permissions(self, request):
         IsOwner().has_permission(request, self)
         IsProjectOwner().has_permission(request, self)
 
+    def get(self, request, user_id, project_id, format=None):
+        self.check_object_permissions(request)
+
+        project = Project.objects.filter(id=project_id, fk_userid=user_id).first()
+
+        if not project:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def delete(self, request, user_id, project_id, format=None):
         self.check_object_permissions(request)
 
         project = Project.objects.filter(id=project_id, fk_userid=user_id).first()
         if project:
+            project_path = project.screenPath
+            try:
+                os.remove(project_path)
+            except:
+                return Response(status=status.HTTP_404_NOT_FOUND)
             project.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:

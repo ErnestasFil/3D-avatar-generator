@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     Drawer,
     List,
@@ -9,25 +9,19 @@ import {
     Toolbar
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import AuthProvider from '../context/AuthProvider';
 import { Link as RouterLink } from 'react-router-dom';
 import {
     Login as LoginIcon,
     AppRegistration as AppRegistrationIcon,
     Collections,
-    ThreeDRotation
+    ThreeDRotation,
+    ViewInAr
 } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 const drawerWidth = 240;
 
 export default function DrawerMenu({ open }) {
-    const [userId, setUserid] = useState(null);
-    useEffect(() => {
-        const fetchUserId = async () => {
-            const result = await AuthProvider.getCurrentUser();
-            setUserid(result);
-        };
-        fetchUserId();
-    });
+    const { isLoggedIn } = useAuth();
     return (
         <Drawer
             sx={{
@@ -44,7 +38,7 @@ export default function DrawerMenu({ open }) {
             open={open}>
             <Toolbar />
             <List>
-                {userId ? (
+                {isLoggedIn ? (
                     <>
                         <ListItem key="image_list" disablePadding>
                             <ListItemButton component={RouterLink} to="/image_list">
@@ -65,9 +59,9 @@ export default function DrawerMenu({ open }) {
                         <ListItem key="scene" disablePadding>
                             <ListItemButton component={RouterLink} to="/scene">
                                 <ListItemIcon>
-                                    <ThreeDRotation />
+                                    <ViewInAr />
                                 </ListItemIcon>
-                                <ListItemText primary="Scene" />
+                                <ListItemText primary="Create 3D project" />
                             </ListItemButton>
                         </ListItem>
                     </>

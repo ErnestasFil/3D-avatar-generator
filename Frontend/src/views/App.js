@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
-import { CssBaseline, Box, Container, Paper } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 import NavBar from '../components/NavBar';
 import DrawerMenu from '../components/Drawer';
 import AppRouter from '../router';
+import { AuthProvider } from '../context/AuthContext';
 
 const darkTheme = createTheme({
     palette: {
@@ -45,17 +46,19 @@ function App() {
         setDrawerOpen(!open);
     };
     return (
-        <Box sx={{ display: 'flex' }}>
-            <ThemeProvider theme={darkTheme}>
-                <CssBaseline />
-                <NavBar handleDrawer={handleDrawer} />
-                <DrawerMenu open={open} />
-                <Main open={open}>
-                    <DrawerHeader />
-                    <AppRouter drawerOpen={handleDrawer} open={open} />
-                </Main>
-            </ThemeProvider>
-        </Box>
+        <AuthProvider>
+            <Box sx={{ display: 'flex' }}>
+                <ThemeProvider theme={darkTheme}>
+                    <CssBaseline />
+                    <NavBar handleDrawer={handleDrawer} />
+                    <DrawerMenu open={open} />
+                    <Main open={open}>
+                        <DrawerHeader />
+                        <AppRouter drawerOpen={handleDrawer} open={open} />
+                    </Main>
+                </ThemeProvider>
+            </Box>
+        </AuthProvider>
     );
 }
 

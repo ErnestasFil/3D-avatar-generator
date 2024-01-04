@@ -5,8 +5,11 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
 import Notification from '../components/Notification';
+import { useAuth } from '../context/AuthContext';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const Login = () => {
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
@@ -38,12 +41,11 @@ const Login = () => {
         setLoading(true);
         const cleanedFormData = removeEmptyValues(formData);
         await axios
-            .post('http://127.0.0.1:8000/api/login', cleanedFormData)
+            .post(`${apiUrl}/api/login`, cleanedFormData)
             .then((response) => {
                 const message = response.data.message;
                 Notification(message, 'Success', 'success', 3000);
-                localStorage.setItem('access-token', response?.data['access-token']);
-                localStorage.setItem('refresh-token', response?.data['refresh-token']);
+                login(response.data);
                 navigate('/');
             })
             .catch((error) => {

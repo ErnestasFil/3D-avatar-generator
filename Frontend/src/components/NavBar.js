@@ -2,11 +2,13 @@ import * as React from 'react';
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem } from '@mui/material';
 import * as Icon from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
-import AuthProvider from '../context/AuthProvider';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import Notification from '../components/Notification';
 export default function NavBar({ handleDrawer }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [userId, setUserid] = React.useState(null);
-
+    const { isLoggedIn, login } = useAuth();
+    const navigate = useNavigate();
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -14,17 +16,11 @@ export default function NavBar({ handleDrawer }) {
     const handleClose = () => {
         setAnchorEl(null);
     };
-    React.useEffect(() => {
-        const fetchUserId = async () => {
-            const result = await AuthProvider.getCurrentUser();
-            setUserid(result);
-            console.log(result);
-        };
-        fetchUserId();
-    });
+
     const handleLogout = () => {
-        AuthProvider.logout();
-        setUserid(null);
+        navigate('/');
+        Notification('Disconnected successfully', 'Success', 'success', 3000);
+        login();
         handleClose();
     };
 
@@ -67,15 +63,8 @@ export default function NavBar({ handleDrawer }) {
                         keepMounted
                         open={Boolean(anchorEl)}
                         onClose={handleClose}>
-                        {userId
+                        {isLoggedIn
                             ? [
-                                  <MenuItem
-                                      key="profile"
-                                      onClick={handleClose}
-                                      component={RouterLink}
-                                      to="/profile">
-                                      Profile
-                                  </MenuItem>,
                                   <MenuItem key="logout" onClick={handleLogout}>
                                       Logout
                                   </MenuItem>

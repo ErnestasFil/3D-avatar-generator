@@ -11,83 +11,71 @@ import {
     Alert,
     AlertTitle
 } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import AuthProvider from '../context/AuthProvider';
-import { FileUpload } from '@mui/icons-material';
-import UploadModal from '../components/UploadModal';
+import { CallMade, ViewInAr } from '@mui/icons-material';
 import Notification from '../components/Notification';
-import ImageDeleteModal from '../components/ImageDeleteModal';
+import ProjectDeleteModal from '../components/ProjectDeleteModal';
+import { useAuth } from '../context/AuthContext';
+import { AuthVerifyRefresh } from '../context/AuthVerifyRefresh';
+const apiUrl = process.env.REACT_APP_API_URL;
 const ProjectListView = () => {
-    const [userId, setUserid] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [imageData, setImageData] = useState([]);
-    const [open, setOpen] = useState(null);
+    const [projectData, setProjectData] = useState([]);
     const [openDelete, setOpenDelete] = useState(null);
     const [deleteData, setDeleteData] = useState([]);
+    const { user, isLoggedIn } = useAuth();
+    const verifyToken = AuthVerifyRefresh();
     useEffect(() => {
-        const fetchData = async () => {
-            const result = await AuthProvider.getCurrentUser();
-            if (result) {
-                setUserid(result);
-                setLoading(true);
-                await axios
-                    .get(`http://127.0.0.1:8000/api/user/${result}/image`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Accept: '*/*',
-                            Authorization: `Bearer ${AuthProvider.getAccessToken()}`
-                        }
-                    })
-                    .then((response) => {
-                        setImageData(response.data);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                        if (error.response?.status === 403) {
-                            const message = error.response
-                                ? error.response.data.detail
-                                : 'Unexpected error';
-                            Notification(message, 'Error', 'error', 3000);
-                        } else {
-                            const message = error.response
-                                ? error.response.data.message
-                                : 'Unexpected error';
-                            Notification(message, 'Error', 'error', 3000);
-                        }
-                    });
-                setLoading(false);
-            }
+        const fetchData = () => {
+            verifyToken().then((token) => {
+                if (isLoggedIn) {
+                    axios
+                        .get(`${apiUrl}/api/user/${user}/project`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Accept: '*/*',
+                                Authorization: `Bearer ${token}`
+                            }
+                        })
+                        .then((response) => {
+                            setProjectData(response.data);
+                        })
+                        .catch((error) => {
+                            if (error.response?.status === 403) {
+                                const message = error.response
+                                    ? error.response.data.detail
+                                    : 'Unexpected error';
+                                Notification(message, 'Error', 'error', 3000);
+                            } else {
+                                const message = error.response
+                                    ? error.response.data.message
+                                    : 'Unexpected error';
+                                Notification(message, 'Error', 'error', 3000);
+                            }
+                        });
+                }
+            });
         };
 
         fetchData();
     }, []);
-    const openModal = () => {
-        setOpen(true);
-    };
-    const closeUploadModal = () => {
-        setOpen(false);
-    };
-    const updateImageList = (newImageData) => {
-        setImageData([...imageData, newImageData]);
-    };
     const openDeleteModal = (value) => {
         setOpenDelete(true);
-        setDeleteData(imageData.filter((item) => item.id === value)[0]);
+        setDeleteData(projectData.filter((item) => item.id === value)[0]);
     };
     const closeDeleteModal = () => {
         setOpenDelete(false);
     };
-    const deleteImageList = (value) => {
-        setImageData(imageData.filter((item) => item.id !== value));
+    const deleteProjectList = (value) => {
+        setProjectData(projectData.filter((item) => item.id !== value));
     };
     return (
         <Container maxWidth="md">
-            <UploadModal open={open} onClose={closeUploadModal} updateImageList={updateImageList} />
-            <ImageDeleteModal
+            <ProjectDeleteModal
                 open={openDelete}
                 data={deleteData}
                 onClose={closeDeleteModal}
-                deleteImageList={deleteImageList}
+                deleteProjectList={deleteProjectList}
             />
             <Card>
                 <CardContent>
@@ -100,34 +88,41 @@ const ProjectListView = () => {
                     <Button
                         fullWidth
                         color="primary"
-                        onClick={openModal}
-                        disabled={loading}
-                        loading={loading.toString()}
-                        startIcon={<FileUpload />}
-                        variant="outlined">
-                        Upload image
+                        startIcon={<ViewInAr />}
+                        variant="outlined"
+                        component={RouterLink}
+                        to="/scene">
+                        Create new project
                     </Button>
-                    {imageData.length === 0 ? (
+                    {projectData.length === 0 ? (
                         <Alert severity="info" sx={{ mt: 3 }}>
-                            <AlertTitle>No images available</AlertTitle>
-                            There are no images to display.
+                            <AlertTitle>No projects available</AlertTitle>
+                            There are no projects to display.
                         </Alert>
                     ) : (
                         <ImageList cols={2} gap={8}>
-                            {imageData.map((item) => (
-                                <ImageListItem
-                                    key={item.id}
-                                    onClick={() => openDeleteModal(item.id)}>
+                            {projectData.map((item) => (
+                                <ImageListItem key={item.id}>
                                     <img
-                                        src={`http://127.0.0.1:8000/${item.path}`}
+                                        src={`${apiUrl}/${item.screenPath}`}
                                         alt={item.name}
                                         loading="lazy"
+                                        onClick={() => openDeleteModal(item.id)}
                                     />
                                     <ImageListItemBar
                                         title={item.name}
-                                        subtitle={`Uploaded on: ${item.upload_date}`}
+                                        subtitle={`Uploaded on: ${item.edit_time}`}
                                         position="below"
                                     />
+                                    <Button
+                                        fullWidth
+                                        color="success"
+                                        startIcon={<CallMade />}
+                                        variant="outlined"
+                                        component={RouterLink}
+                                        to={`/scene/${item.id}`}>
+                                        Select project "{item.name}"
+                                    </Button>
                                 </ImageListItem>
                             ))}
                         </ImageList>

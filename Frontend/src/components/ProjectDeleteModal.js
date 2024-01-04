@@ -13,20 +13,20 @@ import {
 } from '@mui/material/';
 import { Close, Delete, CancelScheduleSend } from '@mui/icons-material';
 import axios from 'axios';
-import Notification from '../components/Notification';
+import Notification from './Notification';
 import { useAuth } from '../context/AuthContext';
 import { AuthVerifyRefresh } from '../context/AuthVerifyRefresh';
 const apiUrl = process.env.REACT_APP_API_URL;
 
-export default function ImageDeleteModal({ open, data, onClose, deleteImageList }) {
+export default function ProjectDeleteModal({ open, data, onClose, deleteProjectList }) {
     const [localOpen, setLocalOpen] = useState(false);
     const { user, isLoggedIn } = useAuth();
     const verifyToken = AuthVerifyRefresh();
-    const deleteImage = async () => {
+    const deleteProject = async () => {
         verifyToken().then((token) => {
             if (isLoggedIn) {
                 axios
-                    .delete(`${apiUrl}/api/user/${user}/image/${data.id}`, {
+                    .delete(`${apiUrl}/api/user/${user}/project/${data.id}`, {
                         headers: {
                             'Content-Type': 'application/json',
                             Accept: '*/*',
@@ -34,8 +34,8 @@ export default function ImageDeleteModal({ open, data, onClose, deleteImageList 
                         }
                     })
                     .then(() => {
-                        deleteImageList(data.id);
-                        Notification('Image deleted successfully.', 'Success', 'success', 3000);
+                        deleteProjectList(data.id);
+                        Notification('Project deleted successfully.', 'Success', 'success', 3000);
                         handleClose();
                     })
                     .catch((error) => {
@@ -48,7 +48,7 @@ export default function ImageDeleteModal({ open, data, onClose, deleteImageList 
                         } else {
                             const message = error.response
                                 ? error.response.data.message
-                                : 'Error removing image.';
+                                : 'Error removing project.';
                             Notification(message, 'Error', 'error', 3000);
                             handleClose();
                         }
@@ -87,24 +87,24 @@ export default function ImageDeleteModal({ open, data, onClose, deleteImageList 
                         <Close />
                     </IconButton>
                     <Typography gutterBottom variant="h5" component="div" align="center">
-                        Image remove
+                        Project remove
                     </Typography>
                     <hr />
                     <Alert severity="warning">
                         <AlertTitle>Warning</AlertTitle>
-                        Are you sure that you want to <strong>remove</strong> this photo?
+                        Are you sure that you want to <strong>remove</strong> this project?
                     </Alert>
                     <hr />
                     <ImageListItem key={data.id}>
                         <img
-                            src={`${apiUrl}/${data.path}`}
+                            src={`http://127.0.0.1:8000/${data.screenPath}`}
                             alt={data.name}
                             style={{ maxHeight: '70vh' }}
                             loading="lazy"
                         />
                         <ImageListItemBar
                             title={data.name}
-                            subtitle={`Uploaded on: ${data.upload_date}`}
+                            subtitle={`Uploaded on: ${data.edit_time}`}
                             position="below"
                         />
                     </ImageListItem>
@@ -115,8 +115,8 @@ export default function ImageDeleteModal({ open, data, onClose, deleteImageList 
                                 variant="outlined"
                                 color="error"
                                 startIcon={<Delete />}
-                                onClick={deleteImage}>
-                                Delete image
+                                onClick={deleteProject}>
+                                Delete project
                             </Button>
                         </Grid>
                         <Grid item xs={12} sm={6}>

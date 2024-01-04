@@ -59,19 +59,21 @@ export default class SceneInit {
     }
 
     onWindowResize(canvasRef, open) {
-        if (window.innerWidth >= 900) {
-            let newWidth = canvasRef.current.clientWidth - 16;
-            const newHeight = window.innerHeight * 0.9;
-            if (open !== undefined && open !== null && open) {
-                newWidth -= 240 - 48 - 10;
-            }
+        const canvas = canvasRef.current;
 
-            if (open !== undefined && open !== null && !open) {
-                newWidth += 240 - 48 - 10;
+        if (canvas) {
+            if (window.innerWidth >= 900) {
+                let newWidth = canvasRef.current.clientWidth - 16;
+                const newHeight = window.innerHeight * 0.9;
+                if (open !== undefined && open !== null && open) {
+                    newWidth -= 240 - 48 - 10;
+                } else if (open !== undefined && open !== null && !open) {
+                    newWidth += 240 - 48 - 10;
+                }
+                this.camera.aspect = newWidth / newHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(newWidth, newHeight);
             }
-            this.camera.aspect = newWidth / newHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(newWidth, newHeight);
         }
     }
     cleanup() {

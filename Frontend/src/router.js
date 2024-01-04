@@ -1,26 +1,49 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './views/LoginView';
 import Register from './views/RegisterView';
 import Home from './views/HomeView';
 import ImageListView from './views/ImageListView';
 import ProjectListView from './views/ProjectListView';
 import SceneView from './views/SceneView';
+import SceneSingleView from './views/SceneSingleView';
+import { useAuth } from './context/AuthContext';
 
 const AppRouter = ({ drawerOpen, open }) => {
-    const navigate = useNavigate();
+    const { isLoggedIn } = useAuth();
 
     return (
         <Routes>
-            <Route exact path="/" element={<Home />} />
-            <Route exact path="/login" element={<Login />} />
-            <Route exact path="/register" element={<Register />} />
-            <Route exact path="/image_list" element={<ImageListView />} />
-            <Route exact path="/project_list" element={<ProjectListView />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+            <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
             <Route
-                exact
+                path="/image_list"
+                element={isLoggedIn ? <ImageListView /> : <Navigate to="/login" />}
+            />
+            <Route
+                path="/project_list"
+                element={isLoggedIn ? <ProjectListView /> : <Navigate to="/login" />}
+            />
+            <Route
                 path="/scene"
-                element={<SceneView drawerOpen={() => drawerOpen()} open={open} />}
+                element={
+                    isLoggedIn ? (
+                        <SceneView drawerOpen={() => drawerOpen()} open={open} />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
+            />
+            <Route
+                path="/scene/:projectId"
+                element={
+                    isLoggedIn ? (
+                        <SceneSingleView drawerOpen={() => drawerOpen()} open={open} />
+                    ) : (
+                        <Navigate to="/login" />
+                    )
+                }
             />
         </Routes>
     );
