@@ -200,7 +200,7 @@ naudotojas bei registruotas sistemos naudotojas.
 Bus vykdomas išsamesnis kertinių sistemos aspektų testavimas, įskaitant
 neregistruotų naudotojų, registruotų naudotojų panaudojimo atvejų
 vertinimą. Šis procesas skirtas įsitikinti, ar sistemos funkcionalumas
-atitinka anksčiau paminėtus panaudojimo atvejus (žr. 1 -- 10 lenteles.)
+atitinka anksčiau paminėtus panaudojimo atvejus (žr. 1 - 10 lenteles.)
 
 ### Būtinosios sąlygos testavimui
 
@@ -243,18 +243,18 @@ Testavimo plano strategija apima šiuos etapus:
 Testavimo veiklos turėtų būti vykdomos pagal svarbą nuo labiausiai
 esminės iki mažiau reikšmingos:
 
--   Saugumo testavimas -- svarbiausias testavimo prioritetas ,nes yra
+-   Saugumo testavimas - svarbiausias testavimo prioritetas ,nes yra
     dirbama su asmeninėmis nuotraukomis sistemoje;
 
--   Vienetų testavimas -- šis etapas yra taip pat svarbus siekiant
+-   Vienetų testavimas - šis etapas yra taip pat svarbus siekiant
     užtikrinti, kad sistema atliktų numatytas funkcijas tiksliai;
 
--   Statinė kodo analizė -- mažiau reikšmingas etapas, nes ji skirta,
+-   Statinė kodo analizė - mažiau reikšmingas etapas, nes ji skirta,
     kad būtų peržiūrimas sistemos kodas siekiant patikrinti ar yra
     laikomasi numatytų standartų, nors sistema ir gali funkcionuoti
     pilnai;
 
--   Greitaveikos testavimas -- mažiausiai svarbus prioritetas.
+-   Greitaveikos testavimas - mažiausiai svarbus prioritetas.
 
 ### Testavimo rizikos
 
