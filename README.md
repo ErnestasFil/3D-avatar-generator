@@ -50,7 +50,7 @@ naudotojas bei registruotas sistemos naudotojas.
 
 -   Peržiūrėti 3D avataro modelį ir jo informaciją.
 
-## 3.	 Vartotojų istorijos
+## 3.	 Panaudojimo atvejai
   -----------------------------------------------------------------------
   **1.** Prisiregistruoti prie sistemos  
 
